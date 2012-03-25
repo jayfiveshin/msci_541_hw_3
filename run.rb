@@ -10,3 +10,4 @@ f += 1
 puts retrieve(f,c,big_d,big_c,smoothing)
 c += 1
 puts retrieve(f,c,big_d,big_c,smoothing)
+puts read_data("data/latimes.dat.gz")
