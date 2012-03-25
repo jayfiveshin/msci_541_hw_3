@@ -77,33 +77,25 @@ def load_index(indexname)
   File.open(indexname, "r") { |file|
     file.each_with_index do |line,i| 
       print "\r\e[0K#{i}"
-      # if i > 20
-      #   break
-      # end
+      if i > 50
+        break
+      end
       if i % 2 == 0
         key = line.chop!
       elsif i % 2 == 1
         line.split("\t").each_with_index do |item,j|
-          # if j > 5
-          #   break
-          # end
-          if j % 2 == 0
-            # docid
+          if j % 2 == 0 # docid
             docid = item.strip!.to_i
-          elsif j % 2 == 1
-            # tf
+          elsif j % 2 == 1 # tf
             inner_h[docid] = item.strip!.to_i
           end
         end
         index_h[key] = inner_h
+        inner_h = {}
       end
     end
   }
   index_h
-  # SANITY CHECK
-  # index_h.keys.each do |key|
-  #   puts key
-  # end
 end
 
 def load_doclist(doclistname)
