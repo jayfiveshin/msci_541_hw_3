@@ -1,3 +1,4 @@
 .DS_Store
 data/latimes.dat.gz
 inverted_index.txt
+*.pdf
