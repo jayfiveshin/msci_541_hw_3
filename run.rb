@@ -1,34 +1,15 @@
 load 'method.rb'
-# all numbers should be float
-# smoothing = 0.5
-# f = 10.0
-# c = 200.0
-# big_d = 700.0
-# big_c = 100000.0
-# puts retrieve(f,c,big_d,big_c,smoothing)
-# f += 1
-# puts retrieve(f,c,big_d,big_c,smoothing)
-# c += 1
-# puts retrieve(f,c,big_d,big_c,smoothing)
-# big_c: total number of word occurrences in the collection
-# c: number of times a query word occurs in the collection of documents
-# big_d: number of words in document D
-# f: number of times query word occurs in document D
+# list of files to be loaded
 filename = "data/latimes.dat.gz"
-indexname = "inverted_index.txt"
-doclistname = "doc_list.txt"
-queryname = "query.txt"
+indexname = "data/inverted_index.txt"
+doclistname = "data/doc_list.txt"
+queryname = "data/query.txt"
 
 t1 = Time.now
+
 index = load_index(indexname) # loads the index
 doc_list = load_doclist(doclistname) # loads the document list
-puts
 
-# puts "Index, key list: #{index.keys}"
-# puts "Index, key \"chernobyl\": #{index["chernobyl"].length}"
-# puts "Index, \"chernobyl\": #{index["chernobyl"]}"
-# puts "Doc list, id 1, docno: #{doc_list[1][0]}"
-# puts "Doc list, id 1, doclength: #{doc_list[1][1]}"
 puts "topicID 0 docno rank score runTag"
 File.open(queryname, "r") { |file|
   file.each do |line|

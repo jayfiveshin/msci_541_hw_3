@@ -95,6 +95,7 @@ def load_index(indexname)
       end
     end
   }
+  puts "" # prepares for next line of output
   index_h
 end
 
