@@ -1,8 +1,14 @@
 require "zlib"
 require "stemmify"
 
-STOPWORDS = open("stopwords").read
-
+STOPWORDS = open("data/stopwords").read
+# log P(Q|D) = sum (log((1-smoothing)*(f / |D|) + (smoothing)*(c / |C|)))
+# f: number of times query word occurs in the document
+# c: number of times query word occurs in the collection
+# |D|: number of word occurrences in the document
+# |C|: number of word occurrences in the collection
+# smoothing: smoothing factor (0-1), the lambda is taken in Ruby
+# Natural logarithim: Math.log
 def retrieve(f,c,big_d,big_c,smoothing)
   if f.class && c.class && big_d.class && smoothing.class == Float
     Math.log((1-smoothing)*(f/big_d)+(smoothing)*(c/big_c))
@@ -76,10 +82,13 @@ def load_index(indexname)
   docid = 0
   File.open(indexname, "r") { |file|
     file.each_with_index do |line,i| 
+      # if i > 49
+      #   print "\r\e[0KDONE"
+      #   break
+      # else
+      #   print "\r\e[0K#{i}"
+      # end
       print "\r\e[0K#{i}"
-      if i > 50
-        break
-      end
       if i % 2 == 0
         key = line.chop!
       elsif i % 2 == 1
@@ -95,6 +104,7 @@ def load_index(indexname)
       end
     end
   }
+  puts "" # prepares for next line of output
   index_h
 end
 
@@ -114,10 +124,3 @@ def load_doclist(doclistname)
   }
   doc_list
 end
-# log P(Q|D) = sum (log((1-smoothing)*(f / |D|) + (smoothing)*(c / |C|)))
-# f: number of times query word occurs in the document
-# c: number of times query word occurs in the collection
-# |D|: number of word occurrences in the document
-# |C|: number of word occurrences in the collection
-# smoothing: smoothing factor (0-1), the lambda is taken in Ruby
-# Natural logarithim: Math.log
