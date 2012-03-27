@@ -1,97 +1,126 @@
 load 'method.rb'
-# all numbers should be float
-# smoothing = 0.5
-# f = 10.0
-# c = 200.0
-# big_d = 700.0
-# big_c = 100000.0
-# puts retrieve(f,c,big_d,big_c,smoothing)
-# f += 1
-# puts retrieve(f,c,big_d,big_c,smoothing)
-# c += 1
-# puts retrieve(f,c,big_d,big_c,smoothing)
-# big_c: total number of word occurrences in the collection
-# c: number of times a query word occurs in the collection of documents
-# big_d: number of words in document D
-# f: number of times query word occurs in document D
+# list of files to be loaded
 filename = "data/latimes.dat.gz"
-indexname = "inverted_index.txt"
-doclistname = "doc_list.txt"
-queryname = "query.txt"
+indexname = "data/inverted_index.txt"
+doclistname = "data/doc_list.txt"
+queryname = "data/query.txt"
+resultsname = "data/results.txt"
 
-t1 = Time.now
+# declare local variables
+topicID = 0
+query_array = []
+docID_array = []
+docno = ""
+f = 0.0
+sum = 0.0
+c = 0.0
+big_d = 0.0
+big_c = 0.0 # this value is a constant
+total_score = 0.0
+sub_score = 0.0
+score_h = {}
+rank = 1
+
+t1 = Time.now # start timing process
+
+puts "loading the index..."
 index = load_index(indexname) # loads the index
+puts "loading doc_list..."
 doc_list = load_doclist(doclistname) # loads the document list
-puts
 
-# puts "Index, key list: #{index.keys}"
-# puts "Index, key \"chernobyl\": #{index["chernobyl"].length}"
-# puts "Index, \"chernobyl\": #{index["chernobyl"]}"
-# puts "Doc list, id 1, docno: #{doc_list[1][0]}"
-# puts "Doc list, id 1, doclength: #{doc_list[1][1]}"
+# calculates |C|
+puts "calculating |C|"
+index.each do |key,value|
+  sum += value.length
+end
+big_c = sum
+puts "|C| = #{big_c}"
+sum = 0.0
+
 puts "topicID 0 docno rank score runTag"
-File.open(queryname, "r") { |file|
-  file.each do |line|
-    entry = line.split(":")
-    query = tokenize(entry[1])
-    query.each do |q|
-      puts q
+# Read list of queries (one line at at time)
+File.open(queryname, "r") do |file|
+  file.each_with_index do |line,j|
+    # Tokenize query list and store information in array
+    topicID = line.split(":")[0]
+    query_array = tokenize(line.split(":")[1])
+
+    # Collect all unique docIDs associated with the query term
+    query_array.each do |query|
+      # if the word does not exist in the index, quit
+      if index[query].nil?
+        break
+      end
+
+      docID_array = docID_array | index[query].keys
     end
-    puts entry[0] + " 0 "
-  end
-}
 
-# tokenize(query).each do |token|
-#   f = index[token][docid].to_f
-#   index[token].each do |k,v|
-#     sum += v
-#   end
-#   c = sum.to_f
-#   sum = 0
-#   big_d = doc_list[docid][1].to_f
-#   index.each do |k,v|
-#     v.each do |k2,v2|
-#       sum += v2
-#     end
-#   end
-#   big_c = sum.to_f
-#   sum = 0
+    # if none of the query words could be found, skip to next
+    if docID_array.empty?
+      puts "Could not find any of the query words from the inverted index"
+      next
+    end
 
-#   puts "f: #{f}"
-#   puts "c: #{c}"
-#   puts "big_d: #{big_d}"
-#   puts "big_c: #{big_c}"
-#   puts "score: #{retrieve(f,c,big_d,big_c,smoothing)}"
-# end
+    # Iterate through each docID in docID_array
+    docID_array.each_with_index do |docID,i|
+      # Get docno
+      docno = doc_list[docID][0]
+      # Get |D|
+      big_d = doc_list[docID][1]
 
-# File.open(queryname, "r") { |file|
-#   file.each do |query|
-#     tokenize(query).each do |token|
-#       index[token].each do |k,v|
-#         sum += v
-#       end
-#       c = sum
-#       sum = 0
-#       doc_list.each do |docid,value|
-#         unless index[token][docid].nil?
-#           puts
-#           puts "docid: #{docid}"
-#           f = index[token][docid]
-#           puts "frequency: #{f}"
-#           big_d = value[1]
-#           puts "|D|: #{big_d}"
-#           puts "c: #{c}"
-#           # index[token].each do |k,v|
-#           #   sum += v
-#           # end
-#           # puts c = sum
-#           # sum = 0
-#         end
-#       end
-#       # puts "#{j}: #{index[token].length}"
-#       # puts index[token]
-#     end
-#   end
-# }
+      # Iterate through each query in query_array
+      query_array.each do |query|
+
+        # if this query word doesn't exist in the index, skip to next
+        if index[query].nil?
+          next
+        end
+        unless index[query][docID].nil?
+          f = index[query][docID]
+        end
+
+        # Compute c
+        c = index[query].length
+
+        # Compute sub_score for each query term
+        sub_score = retrieve(f.to_f, c.to_f, big_d.to_f, big_c.to_f, 0.5)
+
+        # Compute scores for each item in docID_array
+        total_score += sub_score
+      end # query_array
+
+      # Add total_score to a hash (to write to file later)
+      score_h[docno] = total_score
+
+      # Clear total_score for the next document
+      total_score = 0
+
+      # Gives feedback on completion process
+      print "\r\e[0K#{j+1}/#{50}: #{i+1}/#{docID_array.length}"
+    end # docID_array
+
+    # Sort hash and write to file 
+    File.open(resultsname, "a") do |f|
+      score_h.sort_by { |k,v| -1*v }.each do |k,v|
+        # Remove if rank is higher than 1000
+        if rank > 1000
+          break
+        end
+
+        # Write a line to file
+        f.write("#{topicID} 0 #{k} #{rank} #{v} j5shin\n")
+
+        # Increase rank
+        rank += 1
+      end
+    end # file: resultsname
+
+    # Reset variables
+    rank = 0
+    score_h = {}
+    docID_array = []
+  end # query lines
+end # file: queryname
+puts
 t2 = Time.now
 puts "Total run time: #{t2 - t1} seconds"
