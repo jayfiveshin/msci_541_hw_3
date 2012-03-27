@@ -47,7 +47,18 @@ File.open(queryname, "r") do |file|
 
     # Collect all unique docIDs associated with the query term
     query_array.each do |query|
+      # if the word does not exist in the index, quit
+      if index[query].nil?
+        break
+      end
+
       docID_array = docID_array | index[query].keys
+    end
+
+    # if none of the query words could be found, skip to next
+    if docID_array.empty?
+      puts "Could not find any of the query words from the inverted index"
+      next
     end
 
     # Iterate through each docID in docID_array
@@ -59,6 +70,11 @@ File.open(queryname, "r") do |file|
 
       # Iterate through each query in query_array
       query_array.each do |query|
+
+        # if this query word doesn't exist in the index, skip to next
+        if index[query].nil?
+          next
+        end
         unless index[query][docID].nil?
           f = index[query][docID]
         end
@@ -84,7 +100,7 @@ File.open(queryname, "r") do |file|
     end # docID_array
 
     # Sort hash and write to file 
-    File.open(resultsname, "w") do |f|
+    File.open(resultsname, "a") do |f|
       score_h.sort_by { |k,v| -1*v }.each do |k,v|
         # Remove if rank is higher than 1000
         if rank > 1000
@@ -99,11 +115,10 @@ File.open(queryname, "r") do |file|
       end
     end # file: resultsname
 
-    # Reset rank
+    # Reset variables
     rank = 0
-
-    # Clear score_h to save memory
     score_h = {}
+    docID_array = []
   end # query lines
 end # file: queryname
 puts
