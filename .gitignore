@@ -1,5 +1,5 @@
 .DS_Store
-data/latimes.dat.gz
+data/*
 inverted_index.txt
 *.pdf
 data/results.txt
