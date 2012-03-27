@@ -65,11 +65,7 @@ File.open(queryname, "r") do |file|
         end
 
         # Compute c
-        index[query].each do |k,v|
-          sum += v
-        end
-        c = sum
-        sum = 0
+        c = index[query].length
 
         # Compute sub_score for each query term
         sub_score = retrieve(f.to_f, c.to_f, big_d.to_f, big_c.to_f, 0.5)
