@@ -31,11 +31,10 @@ doc_list = load_doclist(doclistname) # loads the document list
 # calculates |C|
 puts "calculating |C|"
 index.each do |key,value|
-  value.each do |k,v|
-    sum += v
-  end
+  sum += value.length
 end
 big_c = sum
+puts "|C| = #{big_c}"
 sum = 0.0
 
 puts "topicID 0 docno rank score runTag"
