@@ -5,6 +5,7 @@ indexname = "data/inverted_index.txt"
 doclistname = "data/doc_list.txt"
 queryname = "data/query.txt"
 resultsname = "data/results.txt"
+timename = "data/query_time.txt"
 
 # declare local variables
 topicID = 0
@@ -41,6 +42,7 @@ puts "topicID 0 docno rank score runTag"
 # Read list of queries (one line at at time)
 File.open(queryname, "r") do |file|
   file.each_with_index do |line,j|
+    query_t1 = Time.now
     # Tokenize query list and store information in array
     topicID = line.split(":")[0]
     query_array = tokenize(line.split(":")[1])
@@ -108,7 +110,7 @@ File.open(queryname, "r") do |file|
         end
 
         # Write a line to file
-        f.write("#{topicID} 0 #{k} #{rank} #{v} j5shin\n")
+        f.write("#{topicID} 0 #{k} #{rank} #{v} j5shin")
 
         # Increase rank
         rank += 1
@@ -119,6 +121,12 @@ File.open(queryname, "r") do |file|
     rank = 0
     score_h = {}
     docID_array = []
+
+    # Finish timing
+    query_t2 = Time.now
+    File.open(timename, "a") do |f|
+      f.write("#{topicID} #{query_t2 - query_t1}")
+    end
   end # query lines
 end # file: queryname
 puts
