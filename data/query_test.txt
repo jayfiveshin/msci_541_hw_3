@@ -1,2 +1,1 @@
-401:paper, cloth
-402:new, fallout, Chernobyl
+401:chernobyl disaster
