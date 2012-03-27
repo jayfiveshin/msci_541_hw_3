@@ -2,3 +2,4 @@
 data/latimes.dat.gz
 inverted_index.txt
 *.pdf
+results.tx
