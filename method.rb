@@ -82,12 +82,6 @@ def load_index(indexname)
   docid = 0
   File.open(indexname, "r") { |file|
     file.each_with_index do |line,i| 
-      # if i > 49
-      #   print "\r\e[0KDONE"
-      #   break
-      # else
-      #   print "\r\e[0K#{i}"
-      # end
       print "\r\e[0K#{i}"
       if i % 2 == 0
         key = line.chop!

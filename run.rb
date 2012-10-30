@@ -4,7 +4,7 @@ filename = "data/latimes.dat.gz"
 indexname = "data/inverted_index.txt"
 doclistname = "data/doc_list.txt"
 queryname = "data/query.txt"
-resultsname = "data/results.txt"
+resultsname = "data/results_top_ten.txt"
 timename = "data/query_time.txt"
 
 # declare local variables
@@ -59,7 +59,7 @@ File.open(queryname, "r") do |file|
 
     # if none of the query words could be found, skip to next
     if docID_array.empty?
-      puts "Could not find any of the query words from the inverted index"
+      puts " Warning: Could not find any of the query words from the inverted index"
       next
     end
 
@@ -85,7 +85,7 @@ File.open(queryname, "r") do |file|
         c = index[query].length
 
         # Compute sub_score for each query term
-        sub_score = retrieve(f.to_f, c.to_f, big_d.to_f, big_c.to_f, 0.5)
+        sub_score = retrieve(f.to_f, c.to_f, big_d.to_f, big_c.to_f, 0.3)
 
         # Compute scores for each item in docID_array
         total_score += sub_score
@@ -105,12 +105,12 @@ File.open(queryname, "r") do |file|
     File.open(resultsname, "a") do |f|
       score_h.sort_by { |k,v| -1*v }.each do |k,v|
         # Remove if rank is higher than 1000
-        if rank > 1000
+        if rank > 10
           break
         end
 
         # Write a line to file
-        f.write("#{topicID} 0 #{k} #{rank} #{v} j5shin")
+        f.write("#{topicID} 0 #{k} #{rank} #{v} j5shin\n")
 
         # Increase rank
         rank += 1
@@ -125,7 +125,7 @@ File.open(queryname, "r") do |file|
     # Finish timing
     query_t2 = Time.now
     File.open(timename, "a") do |f|
-      f.write("#{topicID} #{query_t2 - query_t1}")
+      f.write("#{topicID} #{query_t2 - query_t1}\n")
     end
   end # query lines
 end # file: queryname
